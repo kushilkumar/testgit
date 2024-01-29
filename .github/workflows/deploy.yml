@@ -1,0 +1,39 @@
+name: Deploy Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Deploy to Main
+      run: |
+        if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+          echo "Deploy code to main branch"
+          # Add your deploy script or command here
+        fi
+
+    - name: Upload to F.E or QA
+      run: |
+        if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+          if [[ "${{ inputs.deploy }}" == "yes" ]]; then
+            echo "Commit files to F.E branch"
+            git checkout -b F.E
+          else
+            echo "Commit files to QA branch"
+            git checkout -b QA
+          fi
+        fi
+
+    - name: Commit and Push
+      run: |
+        git add .
+        git commit -m "Automated commit: Deployed to ${{ github.ref }}"
+        git push origin ${{ github.ref }}
